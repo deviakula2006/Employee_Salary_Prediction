@@ -111,9 +111,9 @@ with col1:
     )
 
 with col2:
-    st.subheader("🔮 Prediction")
+    st.subheader("Prediction")
 
-    if st.button("🚀 Predict Salary Class", use_container_width=True):
+    if st.button("Predict Salary Class", use_container_width=True):
         prediction = model.predict(input_df)[0]
 
         if prediction == 1 or prediction == ">50K":
@@ -128,7 +128,7 @@ st.markdown(
     """
     <hr>
     <p style='text-align:center; color:gray;'>
-    Built with ❤️ using Machine Learning & Streamlit
+    Built by ganga using Machine Learning & Streamlit
     </p>
     """,
     unsafe_allow_html=True
