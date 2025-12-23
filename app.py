@@ -2,9 +2,8 @@ import streamlit as st
 import pandas as pd
 import joblib
 
-# -----------------------------
 # Load model
-# -----------------------------
+
 model = joblib.load("income_model.pkl")
 
 st.set_page_config(
@@ -13,9 +12,7 @@ st.set_page_config(
     layout="wide"
 )
 
-# -----------------------------
-# Header
-# -----------------------------
+
 st.markdown(
     """
     <h1 style='text-align: center;'>💼 Employee Salary Classification</h1>
@@ -27,12 +24,18 @@ st.markdown(
     unsafe_allow_html=True
 )
 
-# -----------------------------
-# Sidebar
-# -----------------------------
-st.sidebar.header("🧾 Employee Details")
 
-age = st.sidebar.slider("Age", 18, 70, 30)
+# Sidebar
+
+st.sidebar.header("Employee Details")
+
+age = st.sidebar.number_input(
+    "Age",
+    min_value=18,
+    max_value=100,
+    value=30,
+    step=1
+)
 
 education = st.sidebar.selectbox(
     "Education Level",
@@ -50,12 +53,23 @@ occupation = st.sidebar.selectbox(
     ]
 )
 
-hours_per_week = st.sidebar.slider("Hours per Week", 1, 80, 40)
-gender = st.sidebar.radio("Gender", ["Male", "Female"])
+hours_per_week = st.sidebar.number_input(
+    "Hours Worked Per Week",
+    min_value=1,
+    max_value=100,
+    value=40,
+    step=1
+)
 
-# -----------------------------
+gender = st.sidebar.selectbox(
+    "Gender",
+    ["Male", "Female"]
+)
+
+
+
 # Encoding Maps
-# -----------------------------
+
 education_map = {
     "HS-grad": 9,
     "Some-college": 10,
@@ -83,9 +97,9 @@ occupation_map = {
 
 gender_map = {"Male": 1, "Female": 0}
 
-# -----------------------------
+
 # Build input in training format
-# -----------------------------
+
 input_df = pd.DataFrame(columns=model.feature_names_in_)
 input_df.loc[0] = 0
 
@@ -95,9 +109,9 @@ input_df.loc[0, "occupation"] = occupation_map[occupation]
 input_df.loc[0, "hours-per-week"] = hours_per_week
 input_df.loc[0, "gender"] = gender_map[gender]
 
-# -----------------------------
+
 # Main layout
-# -----------------------------
+
 col1, col2 = st.columns([1.2, 1])
 
 with col1:
@@ -121,9 +135,9 @@ with col2:
         else:
             st.warning("📉 **Predicted Income: ≤ 50K**")
 
-# -----------------------------
+
 # Footer
-# -----------------------------
+
 st.markdown(
     """
     <hr>
