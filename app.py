@@ -1,32 +1,40 @@
 import streamlit as st
 import pandas as pd
+import numpy as np
 import joblib
 
-# Load model
-
-model = joblib.load("income_model.pkl")
+# --------------------------------------------------
+# Load trained model
+# --------------------------------------------------
+MODEL_PATH = "income_model.pkl"
+model = joblib.load(MODEL_PATH)
 
 st.set_page_config(
-    page_title="Employee Salary Classification",
-    page_icon="💼",
+    page_title="Employee Salary Prediction",
     layout="wide"
 )
 
+# --------------------------------------------------
+# Title & Description
+# --------------------------------------------------
+st.title("Employee Salary Prediction Application")
 
 st.markdown(
     """
-    <h1 style='text-align: center;'>💼 Employee Salary Classification</h1>
-    <p style='text-align: center; font-size:18px;'>
-    Predict whether an employee earns <b>&gt;50K</b> or <b>≤50K</b>
-    </p>
-    <hr>
-    """,
-    unsafe_allow_html=True
+    This application predicts whether an employee’s annual income is 
+    **greater than 50K** or **less than or equal to 50K** based on 
+    demographic and work-related information.
+
+    The model was trained using the Adult Income Dataset and deployed 
+    as a web application using Streamlit.
+    """
 )
 
+st.markdown("---")
 
-# Sidebar
-
+# --------------------------------------------------
+# Sidebar Inputs
+# --------------------------------------------------
 st.sidebar.header("Employee Details")
 
 age = st.sidebar.number_input(
@@ -43,7 +51,7 @@ education = st.sidebar.selectbox(
 )
 
 occupation = st.sidebar.selectbox(
-    "Job Role",
+    "Occupation",
     [
         "Tech-support", "Craft-repair", "Other-service", "Sales",
         "Exec-managerial", "Prof-specialty", "Handlers-cleaners",
@@ -66,10 +74,9 @@ gender = st.sidebar.selectbox(
     ["Male", "Female"]
 )
 
-
-
-# Encoding Maps
-
+# --------------------------------------------------
+# Encoding Maps (must match training logic)
+# --------------------------------------------------
 education_map = {
     "HS-grad": 9,
     "Some-college": 10,
@@ -95,11 +102,14 @@ occupation_map = {
     "Armed-Forces": 14
 }
 
-gender_map = {"Male": 1, "Female": 0}
+gender_map = {
+    "Male": 1,
+    "Female": 0
+}
 
-
-# Build input in training format
-
+# --------------------------------------------------
+# Build input in training feature format
+# --------------------------------------------------
 input_df = pd.DataFrame(columns=model.feature_names_in_)
 input_df.loc[0] = 0
 
@@ -109,41 +119,60 @@ input_df.loc[0, "occupation"] = occupation_map[occupation]
 input_df.loc[0, "hours-per-week"] = hours_per_week
 input_df.loc[0, "gender"] = gender_map[gender]
 
-
-# Main layout
-
+# --------------------------------------------------
+# Main Layout
+# --------------------------------------------------
 col1, col2 = st.columns([1.2, 1])
 
 with col1:
-    st.subheader("📊 Input Summary")
-    st.dataframe(
-        pd.DataFrame({
-            "Feature": ["Age", "Education", "Occupation", "Hours/Week", "Gender"],
-            "Value": [age, education, occupation, hours_per_week, gender]
-        }),
-        use_container_width=True
-    )
+    st.subheader("Input Summary")
+
+    summary_df = pd.DataFrame({
+        "Feature": ["Age", "Education", "Occupation", "Hours per Week", "Gender"],
+        "Value": [age, education, occupation, hours_per_week, gender]
+    })
+
+    st.table(summary_df)
 
 with col2:
-    st.subheader("Prediction")
+    st.subheader("Prediction Result")
 
     if st.button("Predict Salary Class", use_container_width=True):
         prediction = model.predict(input_df)[0]
+        probability = model.predict_proba(input_df).max()
 
         if prediction == 1 or prediction == ">50K":
-            st.success("💰 **Predicted Income: > 50K**")
+            st.success("Predicted Income: Greater than 50K")
         else:
-            st.warning("📉 **Predicted Income: ≤ 50K**")
+            st.warning("Predicted Income: Less than or equal to 50K")
 
+        st.write(f"Prediction Confidence: {probability * 100:.2f}%")
 
+    if st.button("Reset Inputs", use_container_width=True):
+        st.experimental_rerun()
+
+# --------------------------------------------------
 # Footer
+# --------------------------------------------------
+st.markdown("---")
 
 st.markdown(
     """
-    <hr>
-    <p style='text-align:center; color:gray;'>
-    Built by ganga using Machine Learning & Streamlit
-    </p>
+    <div style="text-align: center; font-size: 14px;">
+        <p>
+            <b>GitHub Repository:</b>
+            <a href="https://github.com/deviakula2006/Employee_Salary_Prediction.git" target="_blank">
+                Employee Salary Prediction
+            </a>
+        </p>
+        <p>
+            <b>LinkedIn Profile:</b>
+            <a href="https://www.linkedin.com/in/devi-ganga-bhavani-akula-192065291/" target="_blank">
+                Devi Ganga Bhavani Akula
+            </a>
+        </p>
+        <p>Version 1.0</p>
+    </div>
     """,
     unsafe_allow_html=True
 )
