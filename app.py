@@ -1,49 +1,43 @@
 import streamlit as st
 import pandas as pd
-import numpy as np
 import joblib
 
-# --------------------------------------------------
-# Load trained model
-# --------------------------------------------------
-MODEL_PATH = "income_model.pkl"
-model = joblib.load(MODEL_PATH)
-
+# -----------------------------
+# Page Configuration
+# -----------------------------
 st.set_page_config(
-    page_title="Employee Salary Prediction",
+    page_title="Employee Salary Prediction System",
+    page_icon="📊",
     layout="wide"
 )
 
-# --------------------------------------------------
-# Title & Description
-# --------------------------------------------------
-st.title("Employee Salary Prediction Application")
+# -----------------------------
+# Load model
+# -----------------------------
+model = joblib.load("income_model.pkl")
 
+# -----------------------------
+# Header Section
+# -----------------------------
 st.markdown(
     """
-    This application predicts whether an employee’s annual income is 
-    **greater than 50K** or **less than or equal to 50K** based on 
-    demographic and work-related information.
-
-    The model was trained using the Adult Income Dataset and deployed 
-    as a web application using Streamlit.
-    """
+    <div style="text-align:center;">
+        <h1>Employee Salary Prediction System</h1>
+        <p style="font-size:17px; color:#555;">
+        A machine learning–based application to classify employee income levels
+        </p>
+    </div>
+    <hr>
+    """,
+    unsafe_allow_html=True
 )
 
-st.markdown("---")
+# -----------------------------
+# Sidebar - Input Section
+# -----------------------------
+st.sidebar.title("Employee Information")
 
-# --------------------------------------------------
-# Sidebar Inputs
-# --------------------------------------------------
-st.sidebar.header("Employee Details")
-
-age = st.sidebar.number_input(
-    "Age",
-    min_value=18,
-    max_value=100,
-    value=30,
-    step=1
-)
+age = st.sidebar.slider("Age", 18, 70, 30)
 
 education = st.sidebar.selectbox(
     "Education Level",
@@ -61,22 +55,12 @@ occupation = st.sidebar.selectbox(
     ]
 )
 
-hours_per_week = st.sidebar.number_input(
-    "Hours Worked Per Week",
-    min_value=1,
-    max_value=100,
-    value=40,
-    step=1
-)
+hours_per_week = st.sidebar.slider("Working Hours per Week", 1, 80, 40)
+gender = st.sidebar.radio("Gender", ["Male", "Female"])
 
-gender = st.sidebar.selectbox(
-    "Gender",
-    ["Male", "Female"]
-)
-
-# --------------------------------------------------
-# Encoding Maps (must match training logic)
-# --------------------------------------------------
+# -----------------------------
+# Encoding Maps
+# -----------------------------
 education_map = {
     "HS-grad": 9,
     "Some-college": 10,
@@ -102,14 +86,11 @@ occupation_map = {
     "Armed-Forces": 14
 }
 
-gender_map = {
-    "Male": 1,
-    "Female": 0
-}
+gender_map = {"Male": 1, "Female": 0}
 
-# --------------------------------------------------
-# Build input in training feature format
-# --------------------------------------------------
+# -----------------------------
+# Build Input DataFrame
+# -----------------------------
 input_df = pd.DataFrame(columns=model.feature_names_in_)
 input_df.loc[0] = 0
 
@@ -119,60 +100,54 @@ input_df.loc[0, "occupation"] = occupation_map[occupation]
 input_df.loc[0, "hours-per-week"] = hours_per_week
 input_df.loc[0, "gender"] = gender_map[gender]
 
-# --------------------------------------------------
+# -----------------------------
 # Main Layout
-# --------------------------------------------------
-col1, col2 = st.columns([1.2, 1])
+# -----------------------------
+left_col, right_col = st.columns([1.3, 1])
 
-with col1:
+with left_col:
     st.subheader("Input Summary")
+    st.dataframe(
+        pd.DataFrame({
+            "Feature": ["Age", "Education", "Occupation", "Hours per Week", "Gender"],
+            "Value": [age, education, occupation, hours_per_week, gender]
+        }),
+        use_container_width=True
+    )
 
-    summary_df = pd.DataFrame({
-        "Feature": ["Age", "Education", "Occupation", "Hours per Week", "Gender"],
-        "Value": [age, education, occupation, hours_per_week, gender]
-    })
-
-    st.table(summary_df)
-
-with col2:
+with right_col:
     st.subheader("Prediction Result")
 
-    if st.button("Predict Salary Class", use_container_width=True):
+    if st.button("Predict Salary Category", use_container_width=True):
         prediction = model.predict(input_df)[0]
-        probability = model.predict_proba(input_df).max()
+
+        st.markdown(
+            "<div style='padding:20px; border-radius:10px; background:#f5f7fa; border:1px solid #ddd;'>",
+            unsafe_allow_html=True
+        )
 
         if prediction == 1 or prediction == ">50K":
-            st.success("Predicted Income: Greater than 50K")
+            st.markdown(
+                "<h3 style='color:green;'>Predicted Income: Above 50K</h3>",
+                unsafe_allow_html=True
+            )
         else:
-            st.warning("Predicted Income: Less than or equal to 50K")
+            st.markdown(
+                "<h3 style='color:#c0392b;'>Predicted Income: 50K or Below</h3>",
+                unsafe_allow_html=True
+            )
 
-        st.write(f"Prediction Confidence: {probability * 100:.2f}%")
+        st.markdown("</div>", unsafe_allow_html=True)
 
-    if st.button("Reset Inputs", use_container_width=True):
-        st.experimental_rerun()
-
-# --------------------------------------------------
+# -----------------------------
 # Footer
-# --------------------------------------------------
-st.markdown("---")
-
+# -----------------------------
 st.markdown(
     """
-    <div style="text-align: center; font-size: 14px;">
-        <p>
-            <b>GitHub Repository:</b>
-            <a href="https://github.com/deviakula2006/Employee_Salary_Prediction.git" target="_blank">
-                Employee Salary Prediction
-            </a>
-        </p>
-        <p>
-            <b>LinkedIn Profile:</b>
-            <a href="https://www.linkedin.com/in/devi-ganga-bhavani-akula-192065291/" target="_blank">
-                Devi Ganga Bhavani Akula
-            </a>
-        </p>
-        <p>Version 1.0</p>
-    </div>
+    <hr>
+    <p style="text-align:center; color:gray;">
+    Developed by <b>Devi Ganga Bhavani Akula</b> | Machine Learning Project
+    </p>
     """,
     unsafe_allow_html=True
 )
