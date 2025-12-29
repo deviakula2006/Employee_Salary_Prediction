@@ -86,7 +86,7 @@ st.write("")
 # -----------------------------
 # Sidebar Inputs
 # -----------------------------
-st.sidebar.header("🧑 Employee Details")
+st.sidebar.header("Employee Details")
 
 age = st.sidebar.slider("Age", 18, 70, 30)
 education = st.sidebar.selectbox(
@@ -148,7 +148,7 @@ col1, col2 = st.columns([1.2, 1])
 
 with col1:
     st.markdown("<div class='card'>", unsafe_allow_html=True)
-    st.subheader("📋 Input Summary")
+    st.subheader("Input Summary")
 
     st.table(pd.DataFrame({
         "Feature": ["Age", "Education", "Occupation", "Hours / Week", "Gender"],
@@ -158,7 +158,7 @@ with col1:
 
 with col2:
     st.markdown("<div class='card'>", unsafe_allow_html=True)
-    st.subheader("🔮 Prediction")
+    st.subheader("Prediction")
 
     if st.button("Predict Salary Category", use_container_width=True):
         prediction = model.predict(input_df)[0]
@@ -166,7 +166,7 @@ with col2:
         if prediction == 1 or prediction == ">50K":
             st.markdown("""
             <div class="result-success">
-                <h3>💰 Income Prediction: Above 50K</h3>
+                <h3>Income Prediction: Above 50K</h3>
                 <p>This employee is likely to earn more than 50K annually.</p>
             </div>
             """, unsafe_allow_html=True)
